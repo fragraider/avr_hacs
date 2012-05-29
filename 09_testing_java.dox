@@ -1,0 +1,91 @@
+/*!
+@page java_test Java testing
+
+ JUnit is a simple framework to write repeatable tests. JUnit testing in this 
+ project is limited to two methods in the QueryExchangeTest class. The 
+ QueryExchangeTest tests all the way through CreateExecStatement, 
+ DerbyConnectionFactory and to the Database itself so a large part of the 
+ functionality of the Database package is checked out. The functionality 
+ tested is limited to my knowhow of how to check a resultSet. The hard part is 
+ creating the expected resultSet. Our way around that was to make it over to a 
+ String and match individual items. 
+
+ The test of getConfig looks like that below:
+
+ @code
+@Test
+public void testGetConfig() throws Exception {
+	System.out.println("getConfig");
+	String RFID = "997711";
+	QueryExchange instance = new QueryExchange();
+
+	String expResult = "997711";
+	String expResult2 = "1113";
+
+	ResultSet result = instance.getConfig(RFID);
+	result.next();
+
+	String resultString = result.getObject(1).toString();
+	String resultString2 = result.getObject(2).toString();
+	System.out.println(resultString);
+	System.out.println(expResult);        
+
+	assertEquals(expResult, resultString);
+	assertEquals(expResult2, resultString2);
+}
+ @endcode
+
+ @image html get_config_test.png "Successfull getConfig test run"
+ @image latex get_config_test.eps "Successfull getConfig test run" width=\textwidth
+
+ In this method we only look at the RFID and PIN number from the same line in 
+ the database. 
+
+ TestNewUser() is a little bit more ambitious in that it creates a user and 
+ tries to pull values from it again before deleting the user again.
+
+ @code
+public void testNewUser() throws Exception {
+	System.out.println("newUser");
+	String newUserNumber = "131313";
+	QueryExchange instance = new QueryExchange();
+	instance.newUser(newUserNumber);
+	ResultSet result = instance.getConfig(newUserNumber);
+	result.next();
+	String resultString = result.getObject(1).toString();
+	System.out.println(resultString);
+	System.out.println(newUserNumber);
+	assertEquals(resultString, newUserNumber);
+	instance.delUser("131313");
+ @endcode
+
+ @image html user_test.png "Successfull user test run"
+ @image latex user_test.eps "Successfull user test run" width=\textwidth
+
+ JUnit was also used on testing the serial part but was not changed at all 
+ other than to see that it worked. The hardware part was not finished so 
+ testing this part of the system was not expedient I thought and see now that 
+ may have been wrong.
+
+ Other testing on the classes in the classes in the Database package was done 
+ in a couple of different ways depending on if the method being tested 
+ resulted in a query or an update command. 
+ Queries where tested by simply looking at the outcome of the print statements 
+ in CreateExecStatement.queryExecution() method. This gave a clear indication 
+ of what the resultSets looked like.
+
+ Update commands where tested by simply running “SELECT * FROM HACSDB;” on the 
+ database to see what had happened after a method had been run. 
+
+ To begin and before we got the hang of JUnit testing the TestClass in the 
+ Database package was used to test functionality. It has methods that we used 
+ to test both CreateExecStatement and QueryExhchange and by extension the 
+ DerbyConnectionFactory and the Database itself. Most of those tests no longer 
+ match the default SQL script.
+
+ GUI testing was not automated. We tested by trying all functionality with and 
+ without valid RFID’s and clicking the same button twice f.ex. by clicking the 
+ Create New User button twice with the same RFID selected would give us two 
+ different results. Also stopping the database would give us an error message 
+ we wanted to see.
+*/
